@@ -1,0 +1,39 @@
+<?php
+
+function bhcc_webform_triage_form_alter(&$form, $form_state, $form_id) {
+  if (strpos($form_id, 'webform_submission_') === 0) {
+    $webform = $form_state->getFormObject()->getEntity()->getWebform();
+    // dpm(get_class_methods($webform));
+    // dpm($webform->getThirdPartySettings());
+    $triage_enable = $webform->getThirdPartySetting('bhcc_webform_triage', 'triage_enable');
+    if ($triage_enable && !empty($form['#attached']['library'])) {
+      $form['#attached']['library'] = array_filter($form['#attached']['library'], function($item) {
+        return $item == 'webform/webform.form.unsaved' ? FALSE : TRUE;
+      });
+    }
+  }
+
+  if ($form_id == 'webform_settings_form') {
+    $webform = $form_state->getFormObject()->getEntity();
+    $triage_enable = $webform->getThirdPartySetting('bhcc_webform_triage', 'triage_enable');
+    $form['bhcc_triage'] = [
+      '#type' => 'details',
+      '#title' => t('Triage behaviour'),
+      '#weight' => 1,
+    ];
+    $form['bhcc_triage']['triage'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Enable triage form behaviour'),
+      '#description' => t('Triage forms will disable the unsaved message and remove the submit button. You need to make sure any form route has a link to direct users to the correct page.'),
+      '#default_value' => $triage_enable,
+    ];
+    $form['actions']['submit']['#submit'][] = '_bhcc_webform_triage_webform_settings_form_submit';
+  }
+}
+
+function _bhcc_webform_triage_webform_settings_form_submit($form, $form_state) {
+  $webform = $form_state->getFormObject()->getEntity();
+  $triage_enable = $form_state->getValue('triage');
+  $webform->setThirdPartySetting('bhcc_webform_triage', 'triage_enable', $triage_enable);
+  $webform->save();
+}

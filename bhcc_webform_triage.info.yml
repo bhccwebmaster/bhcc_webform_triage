@@ -1,0 +1,7 @@
+name: 'BHCC Webform triage'
+type: module
+description: 'Allow webforms to be designated as triage forms (not submitted)'
+core_version_requirement: ^9 || ^10
+package: 'BHCC Webform'
+dependencies:
+  - webform:webform
