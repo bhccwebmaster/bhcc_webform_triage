@@ -60,6 +60,14 @@ function bhcc_webform_triage_form_webform_settings_form_alter(array &$form, Form
 function _bhcc_webform_triage_webform_settings_form_submit(array $form, FormStateInterface $form_state) {
   $webform = $form_state->getFormObject()->getEntity();
   $triage_enable = $form_state->getValue('triage');
-  $webform->setThirdPartySetting('bhcc_webform_triage', 'triage_enable', $triage_enable);
+  if ($triage_enable) {
+    $webform->setThirdPartySetting('bhcc_webform_triage', 'triage_enable', $triage_enable);
+  }
+
+  // If triage is set to false, best to remove it.
+  // This would allow the module to be uninstalled once no forms require it.
+  else {
+    $webform->unsetThirdPartySetting('bhcc_webform_triage', 'triage_enable');
+  }
   $webform->save();
 }
